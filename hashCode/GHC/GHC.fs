@@ -1,4 +1,4 @@
-module GHC
+module GHC.Main
 
 open FSharpx.Collections
 
