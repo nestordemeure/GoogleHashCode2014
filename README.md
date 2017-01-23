@@ -46,7 +46,7 @@ It is possible to design an algorithm that consider all the cars at the same tim
 
 ## Solutions :
 
-During the competition, the winning team used C++ and an "iterative optimization algorithm" that's all I k
+During the competition, the winning team used C++ and an ["iterative optimization algorithm"](https://france.googleblog.com/2014/04/200-developpeurs-pour-relever-le-defi.html) that's all I know.
 
 Another [solution](https://github.com/jilljenn/hashcode2014/blob/master/haskell-le-langage-de-l-eternel/explication.md), in Haskell. The main difference with my approach is that they start by sending the cars to random junctions on the map. It would probably have improved my performances.
 
