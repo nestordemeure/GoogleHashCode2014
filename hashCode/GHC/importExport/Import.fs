@@ -7,10 +7,6 @@ open GHC.Extensions
 open GHC.Domain
 
 //-------------------------------------------------------------------------------------------------
-
-
-
-//-------------------------------------------------------------------------------------------------
 // IMPORT
 
 /// takes a path and outputs a graph*streetNumber*timeMax*carNumber*startingPoint

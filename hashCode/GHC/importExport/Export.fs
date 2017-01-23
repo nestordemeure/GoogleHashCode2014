@@ -8,24 +8,24 @@ open GHC.Domain
 
 //-------------------------------------------------------------------------------------------------
 
+/// takes a list and export a string of the elements separated by '\n'
 let rec stringOfList l =
    match l with 
    | [] -> ""
    | _ -> List.reduce (fun acc s -> s + "\n" + acc) l
 
+/// takes a car and output a string representation
 let stringOfCar car = 
    let path = List.map string car.path
    sprintf "%d\n%s" (List.length car.path) (stringOfList path)
 
-
 //-------------------------------------------------------------------------------------------------
 // EXPORTATION
 
+/// writes the array of cars to the path
 let export path cars =
-   //File.WriteAllText(path, text)
-   //File.WriteAllLines(path, lines)
-   let carNumber = Array.length cars
-   let mutable result = string carNumber 
-   for car in cars do 
-      result <- result + "\n" + (stringOfCar car)
-   File.WriteAllText(path, result)
+   let carNumber = Array.length cars |> string
+   cars
+   |> Array.map stringOfCar
+   |> Array.fold (fun acc carStr -> acc + "\n" + carStr) carNumber
+   |> fun txt -> File.WriteAllText(path, txt)
