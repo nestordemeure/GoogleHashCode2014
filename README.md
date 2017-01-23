@@ -46,6 +46,8 @@ It is possible to design an algorithm that consider all the cars at the same tim
 
 ## Solutions :
 
-The winning team used C++ and an "iterative optimisation algorithm" that's all I know.
+During the competition, the winning team used C++ and an "iterative optimisation algorithm" that's all I know.
 
 Another [solution](https://github.com/jilljenn/hashcode2014/blob/master/haskell-le-langage-de-l-eternel/explication.md), in Haskell. The main difference with my approach is that they start by sending the cars to random junctions on the map. It would probably have improved my performances.
+
+I found a post describing the optimal [solution](https://a3nm.net/blog/google_hashcode_2014.html) implemented after the competition. Their answer transforms the graph to make sure that an Eulerian path exists and then find a way to split it into 8, they later found out that the problem was a variant of the [k-mixed postman problem](https://en.wikipedia.org/wiki/Route_inspection_problem).
