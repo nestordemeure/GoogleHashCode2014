@@ -41,3 +41,9 @@ Using the coordinates of the junctions might have been useful to avoid cars goin
 With a random generator and enough time, one can pump-up his score (plus, randomnes seems to genuinely help the algorithm)
 
 It is possible to design an algorithm that consider all the cars at the same time, it might be the winning combinaison (given enough constraints)
+
+---
+
+## Solutions :
+
+Another [solution](https://github.com/jilljenn/hashcode2014/blob/master/haskell-le-langage-de-l-eternel/explication.md), in Haskell.
