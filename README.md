@@ -18,7 +18,7 @@ My solutions and their scores were :
 
 - idem, disturbing dijskra algorithm by adding a random number between 0 and (timeMax/400)/80 to the priority : **1842851**
 
-The last score is the best one, it is equivalent to a 9th rank in the competition (biaised because I add access to the subject before starting).
+The last score is the best one, it is equivalent to a 9th rank in the competition (biaised because I had access to the subject before starting).
 
 ---
 
