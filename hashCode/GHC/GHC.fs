@@ -9,11 +9,6 @@ open GHC.Import
 open GHC.Solve
 open GHC.Export
 
-// missing :
-// toseq, fromseq 
-// mutable set
-// scanf
-
 //-------------------------------------------------------------------------------------------------
 // SCORING
 
