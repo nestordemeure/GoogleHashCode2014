@@ -8,23 +8,24 @@ open GHC.Extensions.MPriorityQueue
 
 //-------------------------------------------------------------------------------------------------
 
-//type graph = Dictionary<'key,'Node>
-type Junction = { score : int ; time : int ; destination : int ; id : int }
+type Street = { score : int ; time : int ; destination : int ; id : int }
 
+let rentability (visitedStreets : bool[]) street =
 // could be computed to get as far as possible from the other car
-let rentability (visited : bool[]) junction =
-   if visited.[junction.id] then 0. else 
-      (float junction.score) / (float junction.time)
+      match visitedStreets.[street.id] with 
+      | true -> 0.
+      | false -> (float street.score) / (float street.time)
 
-type Graph = (Junction list) array
+type Graph = (Street list) array
 
 //-------------------------------------------------------------------------------------------------
 
 type Car = { distance : int ; position : int ; usedTime : int ; path : int list }
 
+/// create an array of empty cars
 let createCars carNumber startingPoint = 
    Array.create carNumber { distance = 0 ;  position = startingPoint ; usedTime = 0 ; path = [startingPoint] }
 
+/// takes a queue of cars and output an array of cars
 let carsOfQueue (q : MutablePriorityQueue<'K,'V>) =
-   let result = Array.init (MPriorityQueue.size q) (fun i -> q.[i].v )
-   result
+   Array.init (MPriorityQueue.size q) (fun i -> q.[i].v )

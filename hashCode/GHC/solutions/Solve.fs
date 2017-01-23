@@ -7,8 +7,6 @@ open GHC.Extensions
 open GHC.Extensions.Common
 open GHC.Domain
 
-let mutable score = 0
-
 //-------------------------------------------------------------------------------------------------
 
 let dijstra timeMax (visited:bool array) (graph : Graph) car =
@@ -52,22 +50,11 @@ let visitsOfCar (visited : bool []) (graph : Graph) car =
          visit (n2::q)
    visit car.path
 
-let scoreOfCar (visited : bool []) (graph : Graph) car =
-   let rec visit path = 
-      match path with 
-      | [] | [_] -> visited
-      | n1::n2::q -> 
-         let street = Seq.find (fun s -> s.destination = n1) graph.[n2]
-         if not visited.[street.id] then score <- street.score + score
-         visited.[street.id] <- true
-         visit (n2::q)
-   visit car.path
-
 let greedyDij timeMax visited graph car =
       car |> dijstra timeMax (Array.copy visited) graph |-> visitsOfCar visited graph
 
 let timeOfFloat timeMax x = int (x*(float timeMax))
-let dijSolver pas timeMax streetNumber (graph : Graph) (cars:Car []) =
+let dijSolver timeMax streetNumber (graph : Graph) (cars:Car []) =
    let visited = Array.create streetNumber false
    let inline gDij x car = greedyDij (timeOfFloat timeMax x) visited graph car
    let fractions = [ 0. .. (1./400.) .. 1.]
@@ -76,8 +63,6 @@ let dijSolver pas timeMax streetNumber (graph : Graph) (cars:Car []) =
       | [] -> cars
       | x::q -> cars |> Array.map (gDij x) |> compose q
    let newCars = compose fractions cars
-   Array.fold (fun visited car -> scoreOfCar visited graph car) (Array.create streetNumber false) newCars
-   |> ignore
    newCars
 
 
@@ -99,7 +84,6 @@ let rec greedySolverRec timeMax visited (graph : Graph) carQueue =
          greedySolverRec timeMax visited graph carQueue
       | _ -> 
          let street = List.maxBy (rentability visited) streets
-         if not visited.[street.id] then score <- street.score + score
          visited.[street.id] <- true
          let newCar = { distance = 0 ; position = street.destination ; usedTime = usedTime + street.time ; path = street.destination::car.path }
          MPriorityQueue.push newCar.usedTime newCar carQueue

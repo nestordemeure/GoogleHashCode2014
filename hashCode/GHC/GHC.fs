@@ -9,27 +9,36 @@ open GHC.Import
 open GHC.Solve
 open GHC.Export
 
-//19h20
-// toseq, fromseq visitedDatastruct
-// greedy      13037
-// dij        246485
-// dij10      714622
-// dij160    1612427
-// dij320    1741722 -> 14ème
-// dij360    1561408
-//0. 1/400 1 1732398
-
-// (**)      1827709
-// rng/100   1833850
-// rng/80    1842851 -> 9ème
-
-
-
-
+// missing :
+// toseq, fromseq 
+// mutable set
+// scanf
 
 //-------------------------------------------------------------------------------------------------
+// SCORING
 
+/// stores the final score for the solution
+let mutable score = 0
 
+/// takes a car and update the score
+let scoreOfCar (visited : bool []) (graph : Graph) car =
+   let rec visit path = 
+      match path with 
+      | [] | [_] -> visited
+      | n1::n2::q -> 
+         let street = Seq.find (fun s -> s.destination = n1) graph.[n2]
+         if not visited.[street.id] then score <- street.score + score
+         visited.[street.id] <- true
+         visit (n2::q)
+   visit car.path
+
+/// compute and displays the score given all the cars
+let computeScore streetNumber graph cars =
+    score <- 0
+    let visited = Array.create streetNumber false
+    Array.fold (fun visi car -> scoreOfCar visi graph car) visited cars
+    |> ignore
+    printfn "score : %d" score
 
 //-------------------------------------------------------------------------------------------------
 // MAIN
@@ -42,10 +51,9 @@ let main argv =
     let cars = createCars carNumber startingPoint
     // solve
     //let newCars = greedySolver timeMax streetNumber graph cars
-    let pas = int argv.[0]
-    let newCars = dijSolver pas timeMax streetNumber graph cars
+    let newCars = dijSolver timeMax streetNumber graph cars
     //export
+    computeScore streetNumber graph newCars
     let outPath = "../outPut.txt"
     export outPath newCars
-    printfn "%d" score
     0 // return an integer exit code

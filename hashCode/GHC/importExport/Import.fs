@@ -13,10 +13,11 @@ open GHC.Domain
 //-------------------------------------------------------------------------------------------------
 // IMPORT
 
+/// takes a path and outputs a graph*streetNumber*timeMax*carNumber*startingPoint
 let import path =
-   // File.ReadLines(path)
    let text = 
-      File.ReadAllLines(path) 
+      path
+      |> File.ReadAllLines
       |> Array.map (fun (s:string) -> s.Split ' ')
    // the entete
    let entete = text.[0] |> Array.map int
