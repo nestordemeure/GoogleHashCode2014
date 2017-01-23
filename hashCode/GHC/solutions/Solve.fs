@@ -9,38 +9,47 @@ open GHC.Domain
 
 //-------------------------------------------------------------------------------------------------
 
+/// takes a car and returns the car after it drove in a street (also update visited)
+let carOfStreet (visited:bool[]) (originalCar:Car) street =
+      let newDistance = 
+         match visited.[street.id] with
+         | true -> originalCar.distance
+         | false -> originalCar.distance + street.score
+      visited.[street.id] <- true
+      { 
+         distance = newDistance
+         position = street.destination
+         usedTime = originalCar.usedTime + street.time
+         path = street.destination :: originalCar.path 
+      }
+
+/// searches for the best path a car could follow in the given time
 let dijstra timeMax (visited:bool array) (graph : Graph) car =
-   let mutable bestCar = car 
-   let visitedJunct = Array.create graph.Length false
-
-   let carQueue = MPriorityQueue.empty
-   MPriorityQueue.push 0 car carQueue
-
    let rng = System.Random()
-
+   let visitedJunct = Array.create graph.Length false
+   let carQueue = MPriorityQueue.empty |-> MPriorityQueue.push 0 car
+   let mutable bestCar = car 
+   /// search
    let rec dijstraRec carQueue = 
       match MPriorityQueue.popMin carQueue with 
+      // no more car, time to stop
       | None -> ()
-      | Some (t, car) when (car.usedTime >= timeMax) (*|| visitedJunct.[car.position]*) -> dijstraRec carQueue
+      // the top car is useless, try again
+      | Some (t, car) when (car.usedTime >= timeMax) (*|| visitedJunct.[car.position]*) -> 
+         dijstraRec carQueue
+      // a useful car
       | Some (t, car) ->
+         // saves a car if it is good, note that the junction has been visited
          if car.distance > bestCar.distance then bestCar <- car
          visitedJunct.[car.position] <- true
-         let streets = List.filter (fun s -> (s.time + car.usedTime <= timeMax) && (not visitedJunct.[s.destination])) graph.[car.position]
-         for street in streets do 
-            let newDistance = if visited.[street.id] then car.distance else car.distance + street.score
-            visited.[street.id] <- true
-            let newCar = { 
-               distance = newDistance ; 
-               position = street.destination ; 
-               usedTime = car.usedTime + street.time ; 
-               path = street.destination::car.path }
-            MPriorityQueue.push (newCar.usedTime + rng.Next(timeMax/80)) newCar carQueue
+         // computes all legal path and saves them
+         graph.[car.position] // streets
+         |> List.filter (fun s -> (s.time + car.usedTime <= timeMax) && (not visitedJunct.[s.destination]) )
+         |> List.map (carOfStreet visited car)
+         |> List.iter (fun c -> MPriorityQueue.push (c.usedTime + rng.Next(timeMax/80)) c carQueue)
+         // starts with the new queue
          dijstraRec carQueue
-   
-   dijstraRec carQueue
-   bestCar
-
-//-----
+   dijstraRec carQueue ; bestCar
 
 /// update an array of visited streets with a car's path
 let updateVisitedWithCar (visited : bool []) (graph : Graph) car =
@@ -55,27 +64,19 @@ let updateVisitedWithCar (visited : bool []) (graph : Graph) car =
 
 //-----
 
-let greedyDij timeMax visited graph car =
-      car |> dijstra timeMax (Array.copy visited) graph |-> updateVisitedWithCar visited graph
-
-let timeOfFloat timeMax x = int (x*(float timeMax))
-
-//-----
-
 /// greedy dijstra algorithm + fractionement + random disturbance
 let dijSolver timeMax streetNumber (graph : Graph) (cars:Car []) =
    let visited = Array.create streetNumber false
-
-   let inline gDij x car = greedyDij (timeOfFloat timeMax x) visited graph car
-   let fractions = [ 0. .. (1./400.) .. 1.]
-   let rec compose fractions cars =
-      match fractions with 
-      | [] -> cars
-      | x::q -> cars |> Array.map (gDij x) |> compose q
-   let newCars = compose fractions cars
-
-   newCars
-
+   let fraction = 400
+   // cut the time into steps
+   for step = 1 to fraction do 
+      // greedy, optimise for the cars in order
+      let localTimeMax = (step*timeMax) / fraction
+      for c = 0 to cars.Length - 1 do 
+         // runs dijstra for a car and update the visited streets
+         cars.[c] <- dijstra localTimeMax (Array.copy visited) graph cars.[c]
+         updateVisitedWithCar visited graph cars.[c]
+   cars
 
 //-------------------------------------------------------------------------------------------------
 // SOLUTION
