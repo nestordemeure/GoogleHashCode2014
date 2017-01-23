@@ -40,22 +40,32 @@ let dijstra timeMax (visited:bool array) (graph : Graph) car =
    dijstraRec carQueue
    bestCar
 
-let visitsOfCar (visited : bool []) (graph : Graph) car =
+//-----
+
+/// update an array of visited streets with a car's path
+let updateVisitedWithCar (visited : bool []) (graph : Graph) car =
    let rec visit path = 
       match path with 
       | [] | [_] -> ()
       | n1::n2::q -> 
-         let street = Seq.find (fun s -> s.destination = n1) graph.[n2]
+         let street = List.find (fun s -> s.destination = n1) graph.[n2]
          visited.[street.id] <- true
          visit (n2::q)
    visit car.path
 
+//-----
+
 let greedyDij timeMax visited graph car =
-      car |> dijstra timeMax (Array.copy visited) graph |-> visitsOfCar visited graph
+      car |> dijstra timeMax (Array.copy visited) graph |-> updateVisitedWithCar visited graph
 
 let timeOfFloat timeMax x = int (x*(float timeMax))
+
+//-----
+
+/// greedy dijstra algorithm + fractionement + random disturbance
 let dijSolver timeMax streetNumber (graph : Graph) (cars:Car []) =
    let visited = Array.create streetNumber false
+
    let inline gDij x car = greedyDij (timeOfFloat timeMax x) visited graph car
    let fractions = [ 0. .. (1./400.) .. 1.]
    let rec compose fractions cars =
@@ -63,38 +73,58 @@ let dijSolver timeMax streetNumber (graph : Graph) (cars:Car []) =
       | [] -> cars
       | x::q -> cars |> Array.map (gDij x) |> compose q
    let newCars = compose fractions cars
+
    newCars
 
 
 //-------------------------------------------------------------------------------------------------
 // SOLUTION
 
+/// score/time
+let rentability (visitedStreets : bool[]) street =
+// could be computed to get as far as possible from the other car
+      match visitedStreets.[street.id] with 
+      | true -> 0.
+      | false -> (float street.score) / (float street.time)
+
+/// the cars take the best street one after the other until they cannot drive anymore
 let rec greedySolverRec timeMax visited (graph : Graph) carQueue =
    match MPriorityQueue.popMin carQueue with 
-   | None -> 
-      carsOfQueue carQueue
+   // no car in the queue, should not happend
+   | None -> carQueue
+   // no more car able to drive, time to stop
    | Some (usedTime, car) when usedTime >= timeMax -> 
       MPriorityQueue.push usedTime car carQueue
-      carsOfQueue carQueue
+      carQueue
+   // a valid car
    | Some (usedTime, car) ->
+      /// all the streets reachable in the given time
       let streets = List.filter (fun s -> s.time + usedTime <= timeMax) graph.[car.position]
       match streets with 
       | [] ->
+         // no street, that car cannot drive anymore
          MPriorityQueue.push Int32.MaxValue car carQueue
          greedySolverRec timeMax visited graph carQueue
       | _ -> 
+         // take the best street on sight
          let street = List.maxBy (rentability visited) streets
          visited.[street.id] <- true
-         let newCar = { distance = 0 ; position = street.destination ; usedTime = usedTime + street.time ; path = street.destination::car.path }
+         let newCar = 
+            { 
+                  distance = car.distance + street.score
+                  position = street.destination
+                  usedTime = usedTime + street.time
+                  path = street.destination :: car.path 
+            }
          MPriorityQueue.push newCar.usedTime newCar carQueue
          greedySolverRec timeMax visited graph carQueue
 
+//-----
+
+/// greedy algorithm, the cars take the best street one after the other until they cannot drive anymore
 let greedySolver timeMax streetNumber (graph : Graph) cars =
    let visited = Array.create streetNumber false
-   let carQueue = 
-      let q = MPriorityQueue.empty
-      for car in cars do 
-         MPriorityQueue.push car.usedTime car q
-      q
-   let cars = greedySolverRec timeMax visited (graph : Graph) carQueue
    cars
+   |> Array.fold (fun q car -> q |-> MPriorityQueue.push car.usedTime car) MPriorityQueue.empty //carQueue
+   |> greedySolverRec timeMax visited graph
+   |> carsOfQueue

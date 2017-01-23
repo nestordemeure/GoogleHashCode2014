@@ -10,12 +10,6 @@ open GHC.Extensions.MPriorityQueue
 
 type Street = { score : int ; time : int ; destination : int ; id : int }
 
-let rentability (visitedStreets : bool[]) street =
-// could be computed to get as far as possible from the other car
-      match visitedStreets.[street.id] with 
-      | true -> 0.
-      | false -> (float street.score) / (float street.time)
-
 type Graph = (Street list) array
 
 //-------------------------------------------------------------------------------------------------

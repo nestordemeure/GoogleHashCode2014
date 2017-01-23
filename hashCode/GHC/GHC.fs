@@ -52,7 +52,7 @@ let main argv =
     // solve
     //let newCars = greedySolver timeMax streetNumber graph cars
     let newCars = dijSolver timeMax streetNumber graph cars
-    //export
+    // export
     computeScore streetNumber graph newCars
     let outPath = "../outPut.txt"
     export outPath newCars
