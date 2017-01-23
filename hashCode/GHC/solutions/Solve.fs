@@ -25,7 +25,9 @@ let carOfStreet (visited:bool[]) (originalCar:Car) street =
 
 /// searches for the best path a car could follow in the given time
 let dijstra timeMax (visited:bool array) (graph : Graph) car =
-   let rng = System.Random()
+   let perturbation = 
+      let rng = System.Random()
+      fun () -> rng.Next(timeMax/80)
    let visitedJunct = Array.create graph.Length false
    let carQueue = MPriorityQueue.empty |-> MPriorityQueue.push 0 car
    let mutable bestCar = car 
@@ -35,10 +37,10 @@ let dijstra timeMax (visited:bool array) (graph : Graph) car =
       // no more car, time to stop
       | None -> ()
       // the top car is useless, try again
-      | Some (t, car) when (car.usedTime >= timeMax) (*|| visitedJunct.[car.position]*) -> 
+      | Some (time, car) when (car.usedTime >= timeMax) -> 
          dijstraRec carQueue
       // a useful car
-      | Some (t, car) ->
+      | Some (time, car) ->
          // saves a car if it is good, note that the junction has been visited
          if car.distance > bestCar.distance then bestCar <- car
          visitedJunct.[car.position] <- true
@@ -46,7 +48,7 @@ let dijstra timeMax (visited:bool array) (graph : Graph) car =
          graph.[car.position] // streets
          |> List.filter (fun s -> (s.time + car.usedTime <= timeMax) && (not visitedJunct.[s.destination]) )
          |> List.map (carOfStreet visited car)
-         |> List.iter (fun c -> MPriorityQueue.push (c.usedTime + rng.Next(timeMax/80)) c carQueue)
+         |> List.iter (fun c -> MPriorityQueue.push (c.usedTime + perturbation()) c carQueue)
          // starts with the new queue
          dijstraRec carQueue
    dijstraRec carQueue ; bestCar
