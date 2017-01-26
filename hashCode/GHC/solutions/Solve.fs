@@ -128,6 +128,7 @@ let rec greedySolverRec timeMax visited (graph : Graph) carQueue =
 let greedySolver timeMax streetNumber (graph : Graph) cars =
    let visited = Array.create streetNumber false
    cars
-   |> Array.fold (fun q car -> q |-> MPriorityQueue.push car.usedTime car) MPriorityQueue.empty //carQueue
+   |> Seq.map (fun car -> car.usedTime, car)
+   |> MPriorityQueue.fromSeq
    |> greedySolverRec timeMax visited graph
    |> carsOfQueue
