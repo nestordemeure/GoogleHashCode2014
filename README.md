@@ -48,6 +48,8 @@ It is possible to design an algorithm that consider all the cars at the same tim
 
 During the competition, the winning team used C++ and an ["iterative optimization algorithm"](https://france.googleblog.com/2014/04/200-developpeurs-pour-relever-le-defi.html) that's all I know.
 
+I found a [blog post](http://jill-jenn.net/codeweek/3-exploration-paris.html) saying that the team 2 and 5 used an algorithm of the kind : follow the best unvisited street if possible, otherwise go to the nearest unvisited street.
+
 Another [solution](https://github.com/jilljenn/hashcode2014/blob/master/haskell-le-langage-de-l-eternel/explication.md), in Haskell. The main difference with my approach is that they start by sending the cars to random junctions on the map. It would probably have improved my performances.
 
 I found a post describing the optimal [solution](https://a3nm.net/blog/google_hashcode_2014.html) implemented after the competition. Their answer transforms the graph to make sure that an Eulerian path exists and then find a way to split it into 8, they later found out that the problem was a variant of the [k-mixed postman problem](https://en.wikipedia.org/wiki/Route_inspection_problem)(I added a paper on a state-of-the-art algorithm to the repository).
